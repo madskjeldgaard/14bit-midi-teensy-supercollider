@@ -26,14 +26,9 @@ MIDIIn.connectAll;
 Ndef(\s, {|freq=444, carfreq=919| SinOsc.ar(freq * SinOsc.ar(carfreq))*0.5!2}).mold(2).play;
 )
 
-MIDIFunc.trace(true)
-
 /*********************************/
 /* Using Modality 				 */
 /*********************************/
-
-MKtl.find(\midi);
-
 (
 ~descInput = (
 	idInfo: "Teensy MIDI",
@@ -54,16 +49,7 @@ MKtl.find(\midi);
     )
 );
 
+
+m = MKtl( \testMIDI, ~descInput).trace(true);
+
 );
-
-m = MKtl( \testMIDI, ~descInput );
-m.trace(true)
-
-m.elAt
-
-m.rebuild(~descInput);
-
-2**13
-
-
-0.15 / 0.05
