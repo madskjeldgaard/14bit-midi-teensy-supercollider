@@ -1,9 +1,8 @@
 This is a simple example of a Teensy 3.2 midi-usb controller sending out 14 bit midi data to a host computer. In the example I use two potentiometers. The midi data is then received by SuperCollider and handled from there.
 
+This project is set up using [Platformio core](https://docs.platformio.org/en/latest/core/) for a Teensy 3.2 but can easily be modified for other controllers.
+
 ## The microcontroller
-
-This project is set up using Platformio for a Teensy 3.2 but can easily be modified for other controllers.
-
 Smoothing of the analog signals is handled on the software side using the [ResponsiveAnalogRead](https://github.com/dxinteractive/ResponsiveAnalogRead) library.
 
 The microcontroller itself receives only 13 bits of analog data via it's ADC which is shifted up to fill the entire 14 bit spectrum.
