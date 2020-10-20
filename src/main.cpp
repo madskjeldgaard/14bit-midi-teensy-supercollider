@@ -18,7 +18,6 @@
 #define HIGHCC2 LOWCC2 + 32
 
 /* Pot value storage */
-const int numPots = 2;
 int pot1val = 0;
 int pot2val = 0;
 
