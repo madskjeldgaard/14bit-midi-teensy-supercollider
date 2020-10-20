@@ -1,25 +1,53 @@
 #include "Arduino.h"
+#include <ResponsiveAnalogRead.h>
+
 #define LEDPIN 13
 #define POT_PIN1 14
 #define POT_PIN2 15
 
+/* Set analog resolution */
+#define RESOLUTION 8192
+
+// 14 bit midi is achieved by sending two midicc signals, one "low" combined
+// with one 32 midicc's later called high
+// Here we just define the lower ones
+#define LOWCC1 16
+#define LOWCC2 17
+
+#define HIGHCC1 LOWCC1 + 32
+#define HIGHCC2 LOWCC2 + 32
+
 /* Pot value storage */
 const int numPots = 2;
-int pots[numPots] = {0, 0};
-int potsOld[numPots] = {0, 0};
+int pot1val = 0;
+int pot2val = 0;
 
-/* Set up pins */
+/* Set up read pins */
+ResponsiveAnalogRead pot1(POT_PIN1, true);
+ResponsiveAnalogRead pot2(POT_PIN2, true);
 
 void setup() {
-  /* pin configuration */
-  pinMode(POT_PIN1, INPUT);
-  pinMode(POT_PIN2, INPUT);
-
   /* resolution */
   analogReadResolution(13);
 
   /* smooth input values */
   analogReadAveraging(16);
+
+  /* Set up smooth potentiometer readings */
+  pot1.setAnalogResolution(RESOLUTION);
+
+  // Enabling sleep will cause values to take less time to stop changing and
+  // potentially stop changing more abruptly, where as disabling sleep will
+  // cause values to ease into their correct position smoothly.
+  pot1.enableSleep();
+
+  // edge snap ensures that values at the edges of the spectrum (0 and 8192) can
+  // be easily reached when sleep is enabled
+  pot1.enableEdgeSnap();
+
+  pot2.setAnalogResolution(RESOLUTION);
+  pot2.enableEdgeSnap();
+  pot2.enableSleep();
 
   /* Turn internal led on on boot */
   pinMode(LEDPIN, OUTPUT);
@@ -27,33 +55,26 @@ void setup() {
 }
 
 void readPots() {
-  for (int potNum = 0; potNum < numPots; ++potNum) {
+  pot1.update();
 
-    switch (potNum) {
-    case 0:
-      // Shift up from ADC's 13 bits to Midi 14 bit
-      pots[potNum] = analogRead(POT_PIN1) << 1;
+  if (pot1.hasChanged()) {
+    // Shift up from ADC's 13 bits to Midi 14 bit
+    pot1val = pot1.getValue() << 1;
 
-      if (pots[potNum] != potsOld[potNum]) {
-        usbMIDI.sendControlChange(48, pots[potNum] & 0x7F, 1);
-        usbMIDI.sendControlChange(16, (pots[potNum] >> 7) & 0x7F, 1);
-      }
+    usbMIDI.sendControlChange(HIGHCC1, pot1val & 0x7F, 1);
+    usbMIDI.sendControlChange(LOWCC1, (pot1val >> 7) & 0x7F, 1);
+  }
 
-      break;
-    case 1:
-      pots[potNum] = analogRead(POT_PIN2) << 1;
+  pot2.update();
+  if (pot2.hasChanged()) {
+    pot2val = pot2.getValue() << 1;
 
-      if (pots[potNum] != potsOld[potNum]) {
-        usbMIDI.sendControlChange(49, pots[potNum] & 0x7F, 1);
-        usbMIDI.sendControlChange(17, (pots[potNum] >> 7) & 0x7F, 1);
-      }
-
-      break;
-    }
+    usbMIDI.sendControlChange(HIGHCC2, pot2val & 0x7F, 1);
+    usbMIDI.sendControlChange(LOWCC2, (pot2val >> 7) & 0x7F, 1);
   }
 }
 
 void loop() {
   readPots();
-  delay(1);
+  delay(10);
 }
