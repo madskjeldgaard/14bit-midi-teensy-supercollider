@@ -39,15 +39,15 @@ void setup() {
   // Enabling sleep will cause values to take less time to stop changing and
   // potentially stop changing more abruptly, where as disabling sleep will
   // cause values to ease into their correct position smoothly.
-  pot1.enableSleep();
+  // On by default
+  /* pot1.disableSleep(); */
 
   // edge snap ensures that values at the edges of the spectrum (0 and 8192) can
   // be easily reached when sleep is enabled
-  pot1.enableEdgeSnap();
+  // On by default
+  /* pot1.disableEdgeSnap(); */
 
   pot2.setAnalogResolution(RESOLUTION);
-  pot2.enableEdgeSnap();
-  pot2.enableSleep();
 
   /* Turn internal led on on boot */
   pinMode(LEDPIN, OUTPUT);
